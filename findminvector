@@ -1,0 +1,27 @@
+start: NOP
+
+; Data section
+DB 03H, 05H, 02H, 07H
+
+; Code section
+MVI H, 20H       ; Load higher byte of address of the vector
+LXI D, 1100H     ; Load address of the vector (lower byte) into DE
+MVI A, 04H       ; Set the counter to the number of bytes in the vector
+MOV C, A        ; Load accumulator into register C as the loop counter
+MOV B, M        ; Set register B to the initial value, which is the first byte in the vector
+INX H           ; Increment HL to point to the next byte in the vector
+
+MINFIND: MOV A, M    ; Move content of memory location pointed by DE to A
+        INX D       ; Increment DE to point to the next byte in the vector
+        CMP B       ; Compare content of B with the current minimum value
+        JNC SKIP    ; If B is not smaller than the current minimum value, skip
+        MOV B, A    ; Move content of A to B (as it's smaller)
+        MOV D, H    ; Update register DE to point to the current byte in the vector
+        MOV E, L
+SKIP:   DCR C       ; Decrement counter to move to the next byte in the vector
+        JNZ MINFIND ; If counter is not zero, loop back to compare the next bytes
+
+; Here, the value in register B is the minimum value found in the vector, and
+; register DE contains the address of the last vector element that was checked.
+
+HLT               ; Halt the program
